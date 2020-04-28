@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Calendar View</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
+    <!-- Custom Stylesheet -->
+
+    <link href="css/fullcalendar.css" rel="stylesheet">
+    <script>
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                if (!this.responseText) {
+                    window.location.href = '/projectx/default-route.php';
+                }
+            }
+        };
+        xmlhttp.open("GET", "/projectx/check.php?support=manager", true);
+        xmlhttp.send();
+    </script>
+
+    <link href='./fullcalendar/packages/core/main.css' rel='stylesheet' />
+    <link href='./fullcalendar/packages/daygrid/main.css' rel='stylesheet' />
+    <script src='./fullcalendar/packages/core/main.js'></script>
+    <script src='./fullcalendar/packages/interaction/main.js'></script>
+    <script src='./fullcalendar/packages/daygrid/main.js'></script>
+    <script src="https://unpkg.com/popper.js/dist/umd/popper.min.js"></script>
+    <script src="https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js"></script>
+</head>
+
+<body>
+
+    <div id='calendar-element'></div>
+
+    <!--**********************************
+        Scripts
+    ***********************************-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+    <script>
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                if (this.responseText == "") {
+                    // failed                      
+                } else {
+                    // successed
+                    var result = JSON.parse(this.responseText)
+
+                    let taskArr = [];
+                    for (var project of result) {
+                        taskArr.push({
+                            title: `${project.projectId} | ${project.projectName}`,
+                            description: `วันเริ่มต้น: ${project.projectStart}, วันสิ้นสุด: ${project.projectFinish}, ผู้รับผิดชอบ: ${project.responName}`,
+                            start: project.projectStart
+                        });
+
+                        // calendar.createSchedules([
+                        //     {
+                        //         id: project.projectId,
+                        //         calendarId: '1',
+                        //         title: project.projectName,
+                        //         category: 'time',
+                        //         dueDateClass: '',
+                        //         start: project.projectStart,
+                        //         body: '<br>วันเริ่มต้น: ' + project.projectStart + '<br>วันสิ้นสุด: ' + project.projectFinish,
+                        //         attendees: [project.responName],
+                        //         isReadOnly: true,
+                        //         useDetailPopup: true,
+                        //         bgColor: '#ff0000'
+                        //     }
+                        // ]);
+                    }
+                    
+                    var calendarEl = document.getElementById('calendar-element');
+
+                    var calendar = new FullCalendar.Calendar(calendarEl, {
+                        plugins: [ 'dayGrid' ],
+                        defaultView: 'dayGridMonth',
+                        editable: false,
+                        eventRender: function(info) {
+                            var tooltip = new Tooltip(info.el, {
+                                title: info.event.extendedProps.description,
+                                placement: 'top',
+                                trigger: 'hover',
+                                container: 'body'
+                            });
+                        },
+                        events: taskArr
+                    });
+
+                    calendar.render();
+                }
+            }
+        };
+        xmlhttp.open("GET", "/projectx/calendar.php", true);
+        xmlhttp.send();
+    </script>
+</body>
+
+</html>
